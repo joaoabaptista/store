@@ -3,6 +3,7 @@ package com.store.store.model;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
 @Entity
 @Table(name = "ITEM")
@@ -13,19 +14,16 @@ public class Item {
     private int id;
 
     private String name;
-
     private String location;
-
     private String description;
-
     private String category;
-
-    private Long quantity;
-
+    private Double quantity;
     private BigDecimal price;
+    private Double minimumStock;
+    private int itemRef;
 
-    private Long minimumStock;
-
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL)
+    private Set<ConstructionItem> constructionItems;
 
 
     public int getId() {
@@ -68,11 +66,11 @@ public class Item {
         this.category = category;
     }
 
-    public Long getQuantity() {
+    public Double getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(Long quantity) {
+    public void setQuantity(Double quantity) {
         this.quantity = quantity;
     }
 
@@ -84,12 +82,27 @@ public class Item {
         this.price = price;
     }
 
-    public Long getMinimumStock() {
+    public Double getMinimumStock() {
         return minimumStock;
     }
 
-    public void setMinimumStock(Long minimumStock) {
+    public void setMinimumStock(Double minimumStock) {
         this.minimumStock = minimumStock;
     }
 
+    public int getItemRef() {
+        return itemRef;
+    }
+
+    public void setItemRef(int itemRef) {
+        this.itemRef = itemRef;
+    }
+
+    public Set<ConstructionItem> getConstructionItems() {
+        return constructionItems;
+    }
+
+    public void setConstructionItems(Set<ConstructionItem> constructionItems) {
+        this.constructionItems = constructionItems;
+    }
 }

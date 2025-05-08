@@ -11,7 +11,7 @@ public class ItemService {
     @Autowired
     private ItemRepository itemRepository;
 
-    public Item addQuantity(int id, Long quantity) {
+    public Item addQuantityToStock(int id, Double quantity) {
         Item item = itemRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Item not found") );
 
@@ -19,7 +19,7 @@ public class ItemService {
         return itemRepository.save(item);
     }
 
-    public Item subQuantity(int id, Long quantity) {
+    public Item subQuantityFromStock(int id, Double quantity) {
         Item item = itemRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Item not found") );
 
@@ -34,4 +34,6 @@ public class ItemService {
 
         return itemRepository.save(item);
     }
+
+
 }
