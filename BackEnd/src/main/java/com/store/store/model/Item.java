@@ -3,6 +3,7 @@ package com.store.store.model;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -18,12 +19,12 @@ public class Item {
     private String description;
     private String category;
     private Double quantity;
-    private BigDecimal price;
+    private Double price;
     private Double minimumStock;
     private int itemRef;
 
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL)
-    private Set<ConstructionItem> constructionItems;
+    private Set<ConstructionItem> constructionItems = new HashSet<>();
 
 
     public int getId() {
@@ -74,11 +75,11 @@ public class Item {
         this.quantity = quantity;
     }
 
-    public BigDecimal getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(BigDecimal price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 

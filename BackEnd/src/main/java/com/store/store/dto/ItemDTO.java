@@ -2,21 +2,29 @@ package com.store.store.dto;
 
 import java.math.BigDecimal;
 
-public class ConstructionItemDTO {
-
+public class ItemDTO {
+    private int id;
     private String name;
     private Double quantity;
-    private Double totalPrice;
+    private Double price;
     private int itemRef;
 
-    public ConstructionItemDTO(int itemRef, String name, Double quantity, Double totalPrice ) {
 
+    public ItemDTO(int id, String name, Double quantity, Double price, int itemRef) {
+        this.id = id;
         this.name = name;
         this.quantity = quantity;
-        this.totalPrice = totalPrice;
+        this.price = price;
         this.itemRef = itemRef;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
@@ -35,11 +43,11 @@ public class ConstructionItemDTO {
     }
 
     public Double getPrice() {
-        return totalPrice;
+        return price;
     }
 
     public void setPrice(Double price) {
-        this.totalPrice = totalPrice;
+        this.price = price;
     }
 
     public int getItemRef() {

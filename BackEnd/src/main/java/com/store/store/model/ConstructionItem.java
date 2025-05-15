@@ -2,8 +2,13 @@ package com.store.store.model;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
-@Table(name = "construction_item")
+@Table(name = "construction_item", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"construction_id", "item_id"})
+})
+
 public class ConstructionItem {
 
     @Id
@@ -50,5 +55,19 @@ public class ConstructionItem {
 
     public void setQuantity(Double quantity) {
         this.quantity = quantity;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ConstructionItem)) return false;
+        ConstructionItem that = (ConstructionItem) o;
+        return Objects.equals(construction.getId(), that.construction.getId()) &&
+                Objects.equals(item.getId(), that.item.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(construction.getId(), item.getId());
     }
 }

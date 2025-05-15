@@ -5,6 +5,7 @@ import jdk.jfr.Enabled;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -30,7 +31,7 @@ public class Construction {
     private double longitude;
 
     @OneToMany(mappedBy = "construction", cascade = CascadeType.ALL)
-    private Set<ConstructionItem> constructionItems;
+    private Set<ConstructionItem> constructionItems = new HashSet<>();
 
     public int getId() {
         return id;
