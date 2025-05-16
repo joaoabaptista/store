@@ -1,6 +1,5 @@
 package com.store.store.service;
 
-import com.store.store.dto.ConstructionItemDTO;
 import com.store.store.dto.ItemDTO;
 import com.store.store.model.Construction;
 import com.store.store.model.ConstructionItem;

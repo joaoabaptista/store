@@ -1,9 +1,8 @@
 package com.store.store.controller;
 
-import com.store.store.dto.ConstructionItemDTO;
+import com.store.store.dto.ConstructionDTO;
 import com.store.store.dto.ItemDTO;
 import com.store.store.model.Construction;
-import com.store.store.model.ConstructionItem;
 import com.store.store.model.Item;
 import com.store.store.repository.ConstructionRepository;
 import com.store.store.repository.ItemRepository;
@@ -14,7 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -44,48 +45,64 @@ public class ItemController {
                 .collect(Collectors.toList());
     }
 
+    @GetMapping("/constructions")
+    public List<ConstructionDTO> getConstructions() {
+        List<Construction> constructions = new ArrayList<>();
+        cr.findAll().forEach(constructions::add);
+
+        return constructions.stream()
+                .map(ConstructionDTO::new)
+                .collect(Collectors.toList());
+    }
+
+
 
     @PostMapping("/newItem")
     public Item addItem(@RequestBody Item item) {
         return ir.save(item); //return as Json
     }
 
-    @PostMapping("/add/{quantity}/{itemId}")
-    public ResponseEntity<ItemDTO> addItemToStock(
+    @PostMapping("/add/{quantity}/{itemRef}")
+    public ResponseEntity<ItemDTO> addItemToStockByRef(
             @PathVariable double quantity,
-            @PathVariable int itemId
+            @PathVariable int itemRef
     ) {
-        Item savedItem = itemService.addQuantityToStock(itemId, quantity);
+        Optional<Item> optionalItem = ir.findByItemRef(itemRef);
+        if (optionalItem.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-     //   Double totalPrice = savedItem.getPrice() * savedItem.getQuantity();
+        Item item = optionalItem.get();
+        Item savedItem = itemService.addQuantityToStock(item.getId(), quantity);
 
         ItemDTO dto = new ItemDTO(
                 savedItem.getId(),
                 savedItem.getName(),
                 savedItem.getQuantity(),
                 savedItem.getPrice(),
-              //  totalPrice,
                 savedItem.getItemRef()
         );
         return ResponseEntity.ok(dto);
     }
 
-
-    @PostMapping("/sub/{quantity}/{itemId}")
-    public ResponseEntity<ItemDTO> subItemFromStock(
+    @PostMapping("/sub/{quantity}/{itemRef}")
+    public ResponseEntity<ItemDTO> subItemFromStockByRef(
             @PathVariable double quantity,
-            @PathVariable int itemId
+            @PathVariable int itemRef
     ) {
-        Item savedItem = itemService.subQuantityFromStock(itemId, quantity);
+        Optional<Item> optionalItem = ir.findByItemRef(itemRef);
+        if (optionalItem.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-       // Double totalPrice = savedItem.getPrice() * savedItem.getQuantity();
+        Item item = optionalItem.get();
+        Item savedItem = itemService.subQuantityFromStock(item.getId(), quantity);
 
         ItemDTO dto = new ItemDTO(
                 savedItem.getId(),
                 savedItem.getName(),
                 savedItem.getQuantity(),
                 savedItem.getPrice(),
-               // totalPrice,
                 savedItem.getItemRef()
         );
         return ResponseEntity.ok(dto);
@@ -97,31 +114,62 @@ public class ItemController {
 
     }
 
-    @PostMapping("/construction/{constID}/add/{itemID}/{qnt}")
-    public ResponseEntity<ItemDTO> addItemToConstruction(
+    @PostMapping("/construction/{constID}/add/{itemRef}/{qnt}")
+    public ResponseEntity<ItemDTO> addItemToConstructionByRef(
             @PathVariable int constID,
-            @PathVariable int itemID,
+            @PathVariable int itemRef,
             @PathVariable Double qnt) {
 
-        ItemDTO result = constructionService.addQuantityToConstruction(itemID, constID, qnt);
-        return ResponseEntity.ok(result); // ou status 201 CREATED se for nova ligação
+        Optional<Item> optionalItem = ir.findByItemRef(itemRef);
+        if (optionalItem.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Item item = optionalItem.get();
+        ItemDTO result = constructionService.addQuantityToConstruction(item.getId(), constID, qnt);
+        return ResponseEntity.ok(result);
     }
 
-    @PostMapping("/construction/{constID}/sub/{itemID}/{qnt}")
-    public ResponseEntity<ItemDTO> subItemToConstruction(
+    @PostMapping("/construction/{constID}/sub/{itemRef}/{qnt}")
+    public ResponseEntity<ItemDTO> subItemFromConstructionByRef(
             @PathVariable int constID,
-            @PathVariable int itemID,
+            @PathVariable int itemRef,
             @PathVariable Double qnt) {
 
-        ItemDTO result = constructionService.subQuantityFromConstruction(itemID, constID, qnt);
-        return ResponseEntity.ok(result); // ou status 201 CREATED se for nova ligação
+        Optional<Item> optionalItem = ir.findByItemRef(itemRef);
+        if (optionalItem.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Item item = optionalItem.get();
+        ItemDTO result = constructionService.subQuantityFromConstruction(item.getId(), constID, qnt);
+        return ResponseEntity.ok(result);
     }
+
 
     @PostMapping("/newConstruction")
     public Construction addConstruction(@RequestBody Construction c) {
         return cr.save(c);
     }
 
+    @GetMapping("/item/{itemRef}")
+    public ResponseEntity<ItemDTO> getItemByRef(@PathVariable int itemRef) {
+        Optional<Item> optionalItem = ir.findByItemRef(itemRef);
+
+        if (optionalItem.isPresent()) {
+            Item item = optionalItem.get();
+            ItemDTO dto = new ItemDTO(
+                    item.getId(),
+                    item.getName(),
+                    item.getQuantity(),
+                    item.getPrice(),
+                    item.getItemRef()
+            );
+            return ResponseEntity.ok(dto);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
 
 
