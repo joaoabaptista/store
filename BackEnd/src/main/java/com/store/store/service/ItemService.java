@@ -24,7 +24,7 @@ public class ItemService {
     @Transactional(rollbackFor = Exception.class)
     public Item subQuantityFromStock(int id, Double quantity) {
         Item item = itemRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Item not found") );
+                .orElseThrow(() -> new RuntimeException("Item not found"));
 
         System.out.println("Estoque atual: " + item.getQuantity() + ", quantidade para subtrair: " + quantity);
 
@@ -32,17 +32,20 @@ public class ItemService {
             throw new RuntimeException("Not enough stock to subtract");
         }
 
-        if (item.getQuantity() < quantity) {
-            throw new RuntimeException("Not enough stock to subtract");
+        item.setQuantity(item.getQuantity() - quantity);
+
+        Double minimumStock = item.getMinimumStock();
+        if (minimumStock == null) {
+            minimumStock = 0.0;
         }
 
-        item.setQuantity(item.getQuantity() - quantity);
-        if (item.getQuantity() <= item.getMinimumStock()) {
+        if (item.getQuantity() <= minimumStock) {
             System.out.println("Low stock: " + item.getName());
         }
 
         return itemRepository.save(item);
     }
+
 
 
 }
