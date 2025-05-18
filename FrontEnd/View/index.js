@@ -1,27 +1,119 @@
-import { fetchAllItems, fetchConstructions } from "../Service/sevices.js";
+import { fetchAllItems, fetchConstructions, getConstructionItems } from "../Service/sevices.js";
 
-function createElement(type, options = {}) {
-  const el = document.createElement(type);
-  if (options.className) el.className = options.className;
-  if (options.text) el.textContent = options.text;
-  if (options.html) el.innerHTML = options.html;
-  if (options.attrs) {
-    for (const attr in options.attrs) {
-      el.setAttribute(attr, options.attrs[attr]);
-    }
-  }
-  if (options.events) {
-    for (const ev in options.events) {
-      el.addEventListener(ev, options.events[ev]);
-    }
-  }
-  return el;
+window.onload = init;
+
+function init() {
+
+  
+  const container = document.createElement('div');
+  container.classList.add('page');
+  document.body.appendChild(container);
+
+  const topBar = createTopBar();
+
+  const sideBar = createSideBar();
+
+  container.appendChild(topBar);
+  container.appendChild(sideBar);
 }
+
+function createTopBar(){
+  const bar = document.createElement('div');
+  bar.classList.add('topBar');
+
+  const stock_btn = document.createElement('button')
+  stock_btn.addEventListener('click', () => {
+    /**redirect to search items page */
+    console.log("Ir para pagina de itens")
+  });
+  const stockIcon = addIcon('Resouces/items.png', 'stock_icon');
+
+  stock_btn.appendChild(stockIcon);
+  bar.appendChild(stock_btn);
+
+  return bar;
+}
+
+function createSideBar(){
+  const bar = document.createElement('div');
+  bar.classList.add('sideBar');
+
+  const resumosBtn = document.createElement('a');
+  resumosBtn.textContent = "Resumos";
+  resumosBtn.href = 'ola';
+  resumosBtn.addEventListener('click', openModal)
+
+  bar.appendChild(resumosBtn);
+  return bar;
+}
+
+function createModal() {
+  const modalOverlay = document.createElement('div');
+  modalOverlay.classList.add('modal-overlay');
+
+  const modal = document.createElement('div');
+  modal.classList.add('modal');
+
+  const title = document.createElement('div');
+  title.textContent = 'Digite o nº de Obra';
+
+  const refInput = document.createElement('input');
+  refInput.placeholder = 'Número da obra';
+
+  const checkButton = document.createElement('button');
+  checkButton.textContent = 'Procurar';
+  checkButton.classList.add('check-button');
+  checkButton.addEventListener('click', async () => {
+    const constID = refInput.value.trim();
+    if (!constID) {
+      alert('Digite o número da obra!');
+      return;
+    }
+
+    try {
+      const items = await getConstructionItems(constID);
+      console.log('Itens encontrados:', items);
+      // Aqui você pode chamar uma função para exibir os itens
+      modalOverlay.remove();
+    } catch (error) {
+      console.error('Erro ao buscar itens:', error);
+      alert('Erro ao buscar os itens da obra.');
+    }
+  });
+
+  const closeButton = document.createElement('button');
+  closeButton.textContent = 'Fechar';
+  closeButton.classList.add('close-button');
+  closeButton.addEventListener('click', () => {
+    modalOverlay.remove();
+  });
+
+  modal.appendChild(title);
+  modal.appendChild(refInput);
+  modal.appendChild(checkButton);
+  modal.appendChild(closeButton);
+  modalOverlay.appendChild(modal);
+
+  document.body.appendChild(modalOverlay);
+}
+
+
+function openModal(event) {
+  event.preventDefault(); // previne navegação
+  createModal();
+}
+
+function addIcon(imgPath, iconClass){
+  const icon = document.createElement('img');
+  icon.src = imgPath;
+  icon.classList.add(iconClass)
+  return icon;
+}
+
 
 async function getDashboardData() {
   const produtos = await fetchAllItems();
   const obras = await fetchConstructions();
-  const relatorios = []; // ou buscar de algum endpoint
 
   return [
     { title: 'Produtos', count: produtos.length },
@@ -30,81 +122,6 @@ async function getDashboardData() {
   ];
 }
 
-function init() {
-  const container = createElement('div', { className: 'container' });
-  document.body.appendChild(container);
 
-  // Sidebar
-  const sidebar = createElement('nav', { className: 'sidebar' });
-  const logo = createElement('div', { className: 'logo', text: 'SISTEMA' });
-  sidebar.appendChild(logo);
 
-  const menuItems = [
-    { name: 'Produtos', icon: '🏷️' },
-    { name: 'Obras', icon: '🏗️' },
-    { name: 'Configurações', icon: '⚙️' }
-  ];
 
-  menuItems.forEach((item, i) => {
-    const link = createElement('a', {
-      text: item.name,
-      attrs: { 'href': '#', 'data-icon': item.icon },
-      className: i === 0 ? 'active' : '',
-      events: {
-        click: (e) => {
-          e.preventDefault();
-          alert(`Navegar para ${item.name}`);
-          [...sidebar.querySelectorAll('a')].forEach(a => a.classList.remove('active'));
-          link.classList.add('active');
-        }
-      }
-    });
-    sidebar.appendChild(link);
-  });
-
-  container.appendChild(sidebar);
-
-  // Main content
-  const main = createElement('main', { className: 'content' });
-
-  // Header
-  const header = createElement('header', { className: 'main-header' });
-  const title = createElement('h1', { text: 'Bem-vindo ao Sistema' });
-  const userInfo = createElement('div');
-  header.appendChild(title);
-  header.appendChild(userInfo);
-  main.appendChild(header);
-
-  // Stats Section
-  const stats = createElement('section', { className: 'stats' });
-  main.appendChild(stats);
-
-  // Carregar dados do dashboard e criar cards dentro de stats
-  getDashboardData()
-    .then(cardsData => {
-      stats.innerHTML = ''; // limpa antes de criar
-
-      cardsData.forEach(cardInfo => {
-        const card = createElement('div', {
-          className: 'card',
-          events: { click: () => alert(`Ir para ${cardInfo.title}`) }
-        });
-        const h2 = createElement('h2', { text: cardInfo.title });
-        const p = createElement('p', { text: cardInfo.count });
-        card.appendChild(h2);
-        card.appendChild(p);
-        stats.appendChild(card);
-      });
-    })
-    .catch(err => {
-      console.error('Erro ao carregar dados do dashboard:', err);
-      stats.appendChild(createElement('p', {
-        text: 'Erro ao carregar dados do dashboard.',
-        className: 'text-red-600'
-      }));
-    });
-
-  container.appendChild(main);
-}
-
-window.onload = init;
