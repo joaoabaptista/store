@@ -90,6 +90,8 @@ public class ConstructionService {
                 .orElseThrow(() -> new RuntimeException("Item não encontrado na construção"));
 
         Double newQuantity = constructionItem.getQuantity() - qnt;
+
+
         if (newQuantity < 0) {
             throw new RuntimeException("Não é possível retirar mais do que a quantidade disponível na construção");
         }
@@ -125,7 +127,7 @@ public class ConstructionService {
                     return new ItemDTO(
                             i.getId(),
                             i.getName(),
-                            i.getQuantity(),
+                            ci.getQuantity(),
                             total,
                             i.getItemRef()
                     );
